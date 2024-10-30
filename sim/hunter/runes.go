@@ -152,9 +152,9 @@ func (hunter *Hunter) applySniperTraining() {
 				if spell.ProcMask.Matches(core.ProcMaskRangedSpecial) {
 					spell.BonusCritRating += statDelta * 2 * core.CritRatingPerCritChance
 				}
-				// Chimera - Serpent double dips this bonus and has ProcMaskEmpty so just add 20 here
+				// Chimera - Serpent double dips this bonus and has ProcMaskEmpty so just add 20 here --- Zirene confirmed this is a bug however it's been in SOD for long enough that I don't want to remove until it is confirmed fixed in-game
 				if spell.ActionID.SpellID == 409493 {
-					spell.BonusCritRating += statDelta * 4 * core.CritRatingPerCritChance
+					spell.BonusCritRating += statDelta * 4 * core.CritRatingPerCritChance 
 				}
 			}
 		},

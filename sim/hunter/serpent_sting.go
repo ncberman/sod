@@ -6,6 +6,7 @@ import (
 
 	"github.com/wowsims/sod/sim/core"
 	"github.com/wowsims/sod/sim/core/proto"
+	"github.com/wowsims/sod/sim/core/stats"
 )
 
 func (hunter *Hunter) getSerpentStingConfig(rank int) core.SpellConfig {
@@ -86,6 +87,7 @@ func (hunter *Hunter) chimeraShotSerpentStingSpell(rank int) *core.Spell {
 		DefenseType: core.DefenseTypeRanged,
 		ProcMask:    core.ProcMaskEmpty,
 		Flags:       core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell,
+		MissileSpeed: 24,
 
 		BonusCritRating: 1,
 
@@ -99,7 +101,19 @@ func (hunter *Hunter) chimeraShotSerpentStingSpell(rank int) *core.Spell {
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			// As of phase 5 the only time serpent sting scales with AP is using the Dragonstalker's Pursuit 6P - this AP scaling doesn't benefit from target AP modifiers
 			damage := baseDamage + (hunter.SerpentStingAPCoeff * spell.RangedAttackPower(target, true))
-			spell.CalcAndDealDamage(sim, target, damage, spell.OutcomeRangedHitAndCrit)
+
+			// Chimera - Serpent's delay is caused by this spell being its own ranged cast
+			spell.WaitTravelTime(sim, func(s *core.Simulation) {
+				// However Chimera - Serpent is not affected by Ranged Weapon Specialization ring rune so we are manually removing that hit portion here --- This is a bug confirmed by Zirene, not sure when it will be fixed
+				hasRuneRangedSpec := hunter.HasRune(proto.HunterRune(proto.RingRune_RuneRingRangedWeaponSpecialization))
+				if hasRuneRangedSpec {
+					hunter.AddStatDynamic(sim, stats.MeleeHit,  -3 * core.MeleeHitRatingPerHitChance)
+				}
+				spell.CalcAndDealDamage(sim, target, damage, spell.OutcomeRangedHitAndCrit)
+				if hasRuneRangedSpec {
+					hunter.AddStatDynamic(sim, stats.MeleeHit,  3 * core.MeleeHitRatingPerHitChance)
+				}
+			})
 		},
 	})
 }
