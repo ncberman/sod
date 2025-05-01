@@ -129,6 +129,8 @@ type Hunter struct {
 	MeleeSpells []*core.Spell
 	LastShot    *core.Spell
 
+	SummonPet *core.Spell
+
 	RaptorFuryAura     *core.Aura
 	SniperTrainingAura *core.Aura
 	CobraStrikesAura   *core.Aura
@@ -239,6 +241,7 @@ func (hunter *Hunter) Initialize() {
 	// hunter.registerKillCommand()
 	hunter.registerRapidFire()
 	hunter.registerFocusFireSpell()
+	hunter.registerSummonPetSpell()
 }
 
 func (hunter *Hunter) Reset(sim *core.Simulation) {
